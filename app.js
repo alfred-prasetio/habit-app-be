@@ -1,32 +1,42 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const serverless = require('serverless-http');
 
+const { connectDB } = require('./config/db');
 const authRoutes = require('./routes/auth');
 const goalRoutes = require('./routes/goal');
 const checkInRoutes = require('./routes/CheckIn');
 const podRoutes = require('./routes/pod');
 
-const mongoURI = process.env.MONGODB_URI;
 const app = express();
-const port = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: ['http://localhost:5173', 'https://habit-app-fe-ten.vercel.app/login'],
 }));
 app.use(bodyParser.json());
 
-mongoose.connect(mongoURI)
-    .then(() => console.log('MongoDB connected...'))
-    .catch(err => console.log(err));
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(500).json({ error: 'Database connection failed' });
+  }
+});
+
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use('/auth', authRoutes);
 app.use('/goals', goalRoutes);
 app.use('/check-ins', checkInRoutes);
 app.use('/pods', podRoutes);
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
+
+if (process.env.VERCEL) {
+  module.exports = serverless(app);
+} else {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => console.log(`Server running on port ${port}`));
+}
