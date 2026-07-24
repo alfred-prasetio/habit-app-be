@@ -12,7 +12,7 @@ const podRoutes = require('./routes/pod');
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://habit-app-fe-ten.vercel.app'],
+  origin: ['http://localhost:5173', 'https://habit-app-fe.vercel.app'],
 }));
 app.use(bodyParser.json());
 
