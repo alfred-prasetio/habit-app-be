@@ -18,10 +18,14 @@ app.use(bodyParser.json());
 
 app.use(async (req, res, next) => {
   try {
-    await connectDB();
+    await Promise.race([
+      connectDB(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('DB connection timeout')), 6000)),
+    ]);
     next();
   } catch (err) {
-    res.status(500).json({ error: 'Database connection failed' });
+    console.error('DB connection failed:', err.message);
+    res.status(503).json({ error: 'Database temporarily unavailable, try again' });
   }
 });
 
