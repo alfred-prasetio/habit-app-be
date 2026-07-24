@@ -1,7 +1,7 @@
 const express = require('express');
 const CheckIn = require('../models/CheckIn');
-const Goal = require('../models/Goal');
-const Pod = require('../models/Pod');
+const Goal = require('../models/goal');
+const Pod = require('../models/pod');
 const { requireAuth } = require('../middleware/auth');
 const redis = require('../config/redis');
 
